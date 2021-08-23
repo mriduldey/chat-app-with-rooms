@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const socket = require("socket.io");
+const formatMessage = require("./utils/message");
 
 const app = express();
 const server = http.createServer(app);
@@ -14,16 +15,25 @@ app.use(express.static(path.join(__dirname, "public")));
 io.on("connection", socket => {
   console.log("new user connected");
 
-  // to the client itself
-  socket.emit("message", "Welcome to Chat");
+  // Welcome message to the new client
+  socket.emit("message", formatMessage("MD@Chat Bot", "Welcome to Chat"));
 
   // Broadcast ( to all except the client) when a user connects
-  socket.broadcast.emit("message", "A user has joined the chat");
+  socket.broadcast.emit(
+    "message",
+    formatMessage("MD@Chat Bot", "A new user has joined the chat")
+  );
 
-  // runs when client discconnects
+  // Listen for chatMessage
+  socket.on("chatMessage", msg => {
+    // io.emit("message", msg);
+    io.emit("message", formatMessage("User", msg));
+  });
+
+  // runs when client disconnects
   socket.on("disconnect", () => {
     // to all
-    io.emit("message", "A user has left the chat");
+    io.emit("message", formatMessage("MD@Chat Bot", "A user has left the chat"));
   });
 });
 
