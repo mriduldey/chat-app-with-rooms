@@ -11,14 +11,13 @@ const { username, room } = Qs.parse(location.search, {
 socket.emit("joinRoom", { username, room });
 
 // Get room and users
-socket.on("roomUsers", ({ username, room }) => {
+socket.on("roomUsers", ({ users, room }) => {
   outputRoomName(room);
-  outputUsers(username);
+  outputUsers(users);
 });
 
 // Message from server
 socket.on("message", message => {
-  console.log(username, room);
   outputMessage(message);
 
   // Scroll down
@@ -54,8 +53,15 @@ function outputMessage(message) {
 // Add room name to DOM
 function outputRoomName(room) {
   const roomNameElement = document.getElementById("room-name");
-  console.log(roomNameElement);
   roomNameElement.innerText = room;
 }
 
-// Add
+// Add users to sidebar
+function outputUsers(users) {
+  const userContainer = document.getElementById("users");
+  userContainer.innerHTML = users.reduce(
+    (innerElementString, { username }) =>
+      `${innerElementString}<li>${username}</li>`,
+    ""
+  );
+}
